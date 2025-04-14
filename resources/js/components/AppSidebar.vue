@@ -16,7 +16,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Services',
-        href: '/admin-services',
+        href: '/admin/services',
         icon: Briefcase,
     },
     {

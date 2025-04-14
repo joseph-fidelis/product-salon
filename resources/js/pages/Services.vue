@@ -1,13 +1,24 @@
 <script setup lang="ts">
 import HomeLayout from '@/Layouts/HomeLayout.vue';
+import type { Service } from '@/types/service';
+import { columns } from '@/components/data-table/ServiceColumn';
+import DataTable from '@/components/data-table/DataTable.vue';
 
-const services = [
+const defaultServices: Service[] = [
     { id: 1, name: "Haircut", price: "₦20", description: "Fresh fades, clean lines, and personalized cuts." },
     { id: 2, name: "Braiding", price: "₦50", description: "Expert braiding and seamless hair installations." },
     { id: 3, name: "Lash Extensions", price: "₦30", description: "Semi-permanent lashes for a bold look." },
     { id: 4, name: "Manicure & Pedicure", price: "₦40", description: "Relaxing treatments for hands and feet." },
-    { id: 5, name: "Tattoo Art", price: "₦100", description: "Professional tattoos by in-house artists." }
+    { id: 5, name: "Tattoo Art", price: "₦100", description: "Professional tattoos by in-house artists." },
+    { id: 6, name: "Tattoo Art", price: "₦100", description: "Professional tattoos by in-house artists." },
+    { id: 7, name: "Tattoo Art", price: "₦100", description: "Professional tattoos by in-house artists." },
+    { id: 8, name: "Tattoo Art", price: "₦100", description: "Professional tattoos by in-house artists." }
 ];
+
+const props = defineProps<{
+  services?: Service[];
+}>();
+const services = props.services ?? defaultServices;
 </script>
 
 <template>
@@ -37,26 +48,7 @@ const services = [
                 </h1>
 
                 <!-- Services Table -->
-                <div class="overflow-x-auto">
-                    <table class="w-full border-collapse border border-gray-300 dark:border-gray-700 text-left">
-                        <thead class="bg-gray-100 dark:bg-gray-800">
-                            <tr>
-                                <th class="px-4 py-2 border border-gray-300 dark:border-gray-700">S/N</th>
-                                <th class="px-4 py-2 border border-gray-300 dark:border-gray-700">Service Name</th>
-                                <th class="px-4 py-2 border border-gray-300 dark:border-gray-700">Service Price</th>
-                                <th class="px-4 py-2 border border-gray-300 dark:border-gray-700">Service Description</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="service in services" :key="service.id" class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                <td class="px-4 py-2 border border-gray-300 dark:border-gray-700">{{ service.id }}</td>
-                                <td class="px-4 py-2 border border-gray-300 dark:border-gray-700">{{ service.name }}</td>
-                                <td class="px-4 py-2 border border-gray-300 dark:border-gray-700">{{ service.price }}</td>
-                                <td class="px-4 py-2 border border-gray-300 dark:border-gray-700">{{ service.description }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <DataTable :columns="columns" :data="services" />
             </div>
 
 
