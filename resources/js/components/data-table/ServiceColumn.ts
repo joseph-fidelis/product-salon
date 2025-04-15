@@ -1,9 +1,7 @@
-// resources/js/components/data-table/columns.ts
+
 import type { ColumnDef } from '@tanstack/vue-table';
 import type { Service } from '@/types/service';
-import { Button } from '@/components/ui/button'
-import { ArrowUpDown } from 'lucide-vue-next'
-import { ref, h } from 'vue'
+import {  h } from 'vue'
 import DropdownAction from '@/components/data-table/DataTableDropDown.vue'
 
 

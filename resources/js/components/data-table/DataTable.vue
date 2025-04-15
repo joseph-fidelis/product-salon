@@ -29,6 +29,8 @@ const table = useVueTable({
     getPaginationRowModel: getPaginationRowModel(),
     enableRowSelection: true,
 })
+    // Tells DataTable to expect this emits
+    defineEmits(['edit', 'delete'])
 </script>
 
 <template>

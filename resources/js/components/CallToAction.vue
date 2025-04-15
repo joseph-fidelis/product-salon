@@ -23,7 +23,7 @@ import { Link } from '@inertiajs/vue3';
                 </h1>
             </div>
             <div class="flex justify-center">
-                <Link :href="route('login')"
+                <Link :href="route('book-appointment')"
                     class="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium bg-red-500 text-white rounded-sm hover:bg-red-600 transition-colors">
                     Book Appointment
                     

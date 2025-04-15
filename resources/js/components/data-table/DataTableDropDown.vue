@@ -8,7 +8,7 @@ import type { Service } from '@/types/service'
 const emit = defineEmits(['edit', 'delete']);
 
 const props = defineProps<{
-  item: Service
+  item: any
 }>()
 
 </script>

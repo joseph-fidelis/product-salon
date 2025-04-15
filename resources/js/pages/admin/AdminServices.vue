@@ -15,6 +15,7 @@ const props = defineProps<{
         data: Service[];
     } | null;
 }>();
+
 const dialogOpen = ref(false);
 
 const selectedService = ref<Service | null>(null)
@@ -66,6 +67,7 @@ function handleDelete(service: Service) {
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <!-- Analytics Cards -->
             <div class="grid auto-rows-min gap-4 md:grid-cols-3">
+                <!-- Card 1 -->
                 <div
                     class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
                     <div class="flex items-center justify-center h-full w-full flex-col space-y-4">
@@ -73,7 +75,7 @@ function handleDelete(service: Service) {
                         <h1 class="text-xl">Total Services</h1>
                     </div>
                 </div>
-                <!-- You can add logic for other cards like most expensive/cheapest -->
+                <!-- Card 2 -->
                 <div
                     class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
                     <div class="flex items-center justify-center h-full w-full flex-col space-y-4">
@@ -82,6 +84,7 @@ function handleDelete(service: Service) {
                         <h1 class="text-xl">Most Expensive</h1>
                     </div>
                 </div>
+                <!-- Card 3 -->
                 <div
                     class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
                     <div class="flex items-center justify-center h-full w-full flex-col space-y-4">
