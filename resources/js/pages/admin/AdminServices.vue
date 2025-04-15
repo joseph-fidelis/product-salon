@@ -15,6 +15,9 @@ const props = defineProps<{
         data: Service[];
     } | null;
 }>();
+const dialogOpen = ref(false);
+
+const selectedService = ref<Service | null>(null)
 
 const columns = getServiceColumns({
     onEdit: handleEdit,
@@ -34,28 +37,23 @@ const lowestPriceService = props.services?.data.reduce((minService, currentServi
 }, props.services?.data[0]);
 
 
-const dialogOpen = ref(false);
-
-const selectedService = ref<Service | null>(null)
 
 function handleEdit(service: Service) {
     selectedService.value = service
     dialogOpen.value = true
-    console.log('Edit service:', service);
 }
 
 function handleDelete(service: Service) {
-  if (confirm(`Are you sure you want to delete "${service.name}"?`)) {
     router.delete(route('admin.services.destroy', service.id), {
       preserveScroll: true,
       onSuccess: () => {
-        toast.success('Service deleted successfully');
+        console.log('Service deleted successfully');
       },
       onError: (errors) => {
-        toast.success('Error deleting service');
+        // toast.success('Error deleting service');
+        console.log('Service failed');
       }
     });
-  }
 }
 
 </script>
@@ -109,6 +107,6 @@ function handleDelete(service: Service) {
         </div>
 
         <!-- Dialog -->
-        <ServiceDialog :open="dialogOpen" @close="dialogOpen = false" />
+        <ServiceDialog :open="dialogOpen" @close="dialogOpen = false" :service="selectedService" />
     </AppLayout>
 </template>
