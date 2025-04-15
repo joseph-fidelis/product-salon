@@ -70,10 +70,13 @@
     open: boolean;
     service?: Service | null;
   }>();
+
   const emit = defineEmits(['close']);
   
   const isOpen = ref(props.open);
+
   watch(() => props.open, (val) => isOpen.value = val);
+
   watch(isOpen, (val) => { if (!val) emit('close') });
   
   const isEditMode = computed(() => !!props.service);
@@ -90,13 +93,14 @@
     validationSchema: serviceSchema,
     initialValues: {
       name: props.service?.name ?? '',
-      price: props.service?.price ?? 0,
+      price: props.service?.price ?? 0.0,
       description: props.service?.description ?? '',
     }
   });
   
   // --- Form submission
   const onSubmit = handleSubmit((data) => {
+
     if (isEditMode.value && props.service) {
       useInertiaForm(data).put(route('services.update', props.service.id), {
         preserveScroll: true,
@@ -109,5 +113,6 @@
       });
     }
   });
+
   </script>
   
