@@ -5,13 +5,13 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, Users, FileText, Briefcase,  Calendar } from 'lucide-vue-next';
+import { BookOpen, Folder, LayoutGrid, Users, FileText, Briefcase,  Calendar, Send } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: '/dashboard',
+        href: '/admin/dashboard',
         icon: LayoutGrid,
     },
     {
@@ -21,17 +21,17 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Appointments',
-        href: '/admin-appointment',
+        href: '/admin/appointment',
         icon: Calendar,
     },
     {
         title: 'Staff',
-        href: '/admin-staff',
+        href: '/admin/staff',
         icon: Users,
     },
     {
         title: 'Invoice',
-        href: '/admin-invoice',
+        href: '/admin/invoice',
         icon: FileText,
     },
 
@@ -39,15 +39,15 @@ const mainNavItems: NavItem[] = [
 
 const footerNavItems: NavItem[] = [
     {
-        title: 'Github Repo',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits',
-        icon: BookOpen,
-    },
+        title: 'Email Developer Support',
+        href: 'mailto:sofrosyninc@gmail.com?subject=Service%20Inquiry%20Salon%20Solution&body=Hello%2C%0AI%20would%20like%20to%20learn%20more%20about%20your%20services.',
+        icon: Send,
+    }
+    // {
+    //     title: 'Documentation',
+    //     href: 'https://laravel.com/docs/starter-kits',
+    //     icon: BookOpen,
+    // },
 ];
 </script>
 

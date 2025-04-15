@@ -1,24 +1,16 @@
 <script setup lang="ts">
 import HomeLayout from '@/Layouts/HomeLayout.vue';
 import type { Service } from '@/types/service';
-import { columns } from '@/components/data-table/ServiceColumn';
+import { publicColumn } from '@/components/data-table/ServiceColumn';
 import DataTable from '@/components/data-table/DataTable.vue';
 
-const defaultServices: Service[] = [
-    { id: 1, name: "Haircut", price: "₦20", description: "Fresh fades, clean lines, and personalized cuts." },
-    { id: 2, name: "Braiding", price: "₦50", description: "Expert braiding and seamless hair installations." },
-    { id: 3, name: "Lash Extensions", price: "₦30", description: "Semi-permanent lashes for a bold look." },
-    { id: 4, name: "Manicure & Pedicure", price: "₦40", description: "Relaxing treatments for hands and feet." },
-    { id: 5, name: "Tattoo Art", price: "₦100", description: "Professional tattoos by in-house artists." },
-    { id: 6, name: "Tattoo Art", price: "₦100", description: "Professional tattoos by in-house artists." },
-    { id: 7, name: "Tattoo Art", price: "₦100", description: "Professional tattoos by in-house artists." },
-    { id: 8, name: "Tattoo Art", price: "₦100", description: "Professional tattoos by in-house artists." }
-];
 
 const props = defineProps<{
-  services?: Service[];
+  services: {
+    data: Service[]; 
+  } | null;
 }>();
-const services = props.services ?? defaultServices;
+
 </script>
 
 <template>
@@ -48,7 +40,7 @@ const services = props.services ?? defaultServices;
                 </h1>
 
                 <!-- Services Table -->
-                <DataTable :columns="columns" :data="services" />
+                <DataTable :columns="publicColumn" :data="services?.data || []" />
             </div>
 
 

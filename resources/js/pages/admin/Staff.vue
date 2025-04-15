@@ -7,7 +7,7 @@ import PlaceholderPattern from '@/components/PlaceholderPattern.vue';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Staff',
-        href: '/admin-staff',
+        href: '/admin/staff',
     },
     
 ];

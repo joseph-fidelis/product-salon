@@ -2,14 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\ServiceController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
 
-Route::get('/services', function () {
-    return Inertia::render('Services');
-})->name('services');
+Route::get('/services', [ServiceController::class, 'publicIndex'])->name('services');
 
 Route::get('/about', function () {
     return Inertia::render('About');

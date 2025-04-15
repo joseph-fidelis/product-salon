@@ -29,6 +29,20 @@ const lowestPriceService = props.services?.data.reduce((minService, currentServi
 
 const dialogOpen = ref(false);
 
+const selectedService = ref<Service | null>(null)
+
+function handleEdit(service: Service) {
+  selectedService.value = service
+  dialogOpen.value = true
+  console.log('Delete service:', service);
+}
+
+function handleDelete(service: Service) {
+  // Handle delete logic here
+  console.log('Delete service:', service);
+}
+
+
 </script>
 
 <template>
@@ -68,7 +82,7 @@ const dialogOpen = ref(false);
 
       <!-- Table Section -->
       <div class="relative min-h-[100vh] flex-1 rounded-xl md:min-h-min">
-        <DataTable :columns="columns" :data="services?.data || []" />
+        <DataTable :columns="columns" :data="services?.data || []" @edit="handleEdit" @delete="handleDelete" />
       </div>
     </div>
 

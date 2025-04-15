@@ -3,15 +3,12 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { MoreHorizontal } from 'lucide-vue-next'
 
-defineProps<{
-  item: {
-    id: number
-  }
+import type { Service } from '@/types/service'
+
+const props = defineProps<{
+  item: Service
 }>()
 
-function copy(id: string) {
-  navigator.clipboard.writeText(id)
-}
 </script>
 
 <template>
@@ -24,12 +21,12 @@ function copy(id: string) {
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end">
       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-      <DropdownMenuItem @click="copy(item.id)">
+      <!-- <DropdownMenuItem @click="copy(item.id)">
         View
       </DropdownMenuItem>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem>Edit</DropdownMenuItem>
-      <DropdownMenuItem class="text-red-600">Delete</DropdownMenuItem>
+      <DropdownMenuSeparator /> -->
+      <DropdownMenuItem  @click="$emit('edit', item)" >Edit</DropdownMenuItem>
+      <DropdownMenuItem  @click="$emit('delete', item)" class="text-red-600">Delete</DropdownMenuItem>
       
     </DropdownMenuContent>
   </DropdownMenu>

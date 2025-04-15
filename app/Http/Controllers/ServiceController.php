@@ -17,7 +17,7 @@ class ServiceController extends Controller
         $services = Service::query()
             ->when($request->search, fn ($q) => $q->where('name', 'like', '%' . $request->search . '%'))
             ->latest()
-            ->paginate(10)
+            ->paginate(100)
             ->withQueryString();
 
         return Inertia::render('admin/AdminServices', [
@@ -29,6 +29,20 @@ class ServiceController extends Controller
         ]);
     }
 
+    public function publicIndex(Request $request)
+    {
+        $services = Service::query()
+            ->when($request->search, fn ($q) => $q->where('name', 'like', '%' . $request->search . '%'))
+            ->latest()
+            ->paginate(100)
+            ->withQueryString();
+
+
+        return Inertia::render('Services', [
+            'services' => $services
+            
+        ]);
+    }
     /**
      * Store a newly created resource in storage.
      */
