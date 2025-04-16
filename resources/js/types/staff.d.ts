@@ -2,8 +2,8 @@ import { Service } from "./service";
 
 export interface Staff {
     id: number;
-    firstName: string;
-    lastName: string;
+    first_name: string;
+    last_name: string;
     email: string;
     phone?: string;
     address?: string;

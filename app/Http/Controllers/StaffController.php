@@ -12,10 +12,7 @@ class StaffController extends Controller
      */
     public function index()
     {
-        $staff = Staff::query()
-            ->latest()
-            ->paginate(100)
-            ->withQueryString();
+        $staff = Staff::with('specialization')->latest()->paginate(100)->withQueryString();;
 
         return inertia('admin/Staff', [
             'staff' => $staff,
@@ -32,7 +29,21 @@ class StaffController extends Controller
      */
     public function store(Request $request)
     {
-        Staff::create($request->validate());
+        $data = $request->validate([
+            'first_name' => ['required', 'string'],
+            'last_name' => ['required', 'string'],
+            'email' => ['required', 'email'],
+            'phone' => ['required', 'string'],
+            'address' => ['nullable', 'string'],
+            'emergency_contact' => ['required', 'string'],
+            'commission' => ['required', 'numeric', 'min:0', 'max:100'],
+            'specialization' => ['array'],
+            'specialization.*' => ['exists:services,id'],
+        ]);
+    
+        $staff = Staff::create($data);
+        $staff->specialization()->sync($data['specialization'] ?? []);
+    
         return back()->with('success', 'Staff created successfully.');
     }
 
@@ -51,8 +62,23 @@ class StaffController extends Controller
      */
     public function update(Request $request, Staff $staff)
     {
-        $staff->update($request->validate());
+        $data = $request->validate([
+            'first_name' => ['required', 'string'],
+            'last_name' => ['required', 'string'],
+            'email' => ['required', 'email'],
+            'phone' => ['required', 'string'],
+            'address' => ['nullable', 'string'],
+            'emergency_contact' => ['required', 'string'],
+            'commission' => ['required', 'numeric', 'min:0', 'max:100'],
+            'specialization' => ['array'],
+            'specialization.*' => ['exists:services,id'],
+        ]);
+    
+        $staff->update($data);
+        $staff->specialization()->sync($data['specialization'] ?? []);
+    
         return back()->with('success', 'Staff updated successfully.');
+
     }
 
     /**

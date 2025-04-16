@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Service;
 
 class Staff extends Model
 {
@@ -14,6 +15,11 @@ class Staff extends Model
         'address',
         'emergency_contact',
         'commission',
-        'specialization',
+        
     ];
+
+    public function specialization()
+    {
+        return $this->belongsToMany(Service::class);
+    }
 }
