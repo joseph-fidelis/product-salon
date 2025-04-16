@@ -4,6 +4,8 @@ import path from 'path';
 import tailwindcss from "@tailwindcss/vite";
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
+import AutoImport from 'unplugin-auto-import/vite';
+import Components from 'unplugin-vue-components/vite';
 
 export default defineConfig({
     plugins: [
@@ -20,6 +22,30 @@ export default defineConfig({
                     includeAbsolute: false,
                 },
             },
+        }),
+
+        AutoImport({
+            imports: [
+                'vue',
+                'vue-router',
+                '@vueuse/core',
+                {
+                    '@inertiajs/vue3': [
+                        'router',
+                        'useForm',
+                        'usePage',
+                    ],
+                },
+            ],
+            dts: 'resources/js/auto-imports.d.ts',
+            dirs: ['resources/js/composables'],
+        }),
+        
+        Components({
+            dirs: ['resources/js/components', 'resources/js/components/ui'],
+            extensions: ['vue'],
+            deep: true,
+            dts: 'resources/js/components.d.ts',
         }),
     ],
     resolve: {

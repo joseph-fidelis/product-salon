@@ -43,9 +43,12 @@
         "tailwindcss": "^4.1.1",
         "tailwindcss-animate": "^1.0.7",
         "typescript": "^5.2.2",
+        "unplugin-auto-import": "^19.1.2",
+        "unplugin-vue-components": "^28.5.0",
         "vee-validate": "^4.15.0",
         "vite": "^6.2.0",
         "vue": "^3.5.13",
+        "vue-router": "^4.5.0",
         "ziggy-js": "^2.4.2",
         "zod": "^3.24.2"
     },

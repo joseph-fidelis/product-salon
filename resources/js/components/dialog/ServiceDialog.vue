@@ -70,44 +70,60 @@
     open: boolean;
     service?: Service | null;
   }>();
+
   const emit = defineEmits(['close']);
   
   const isOpen = ref(props.open);
+
   watch(() => props.open, (val) => isOpen.value = val);
+
   watch(isOpen, (val) => { if (!val) emit('close') });
   
+  // Determine if it's in edit mode
   const isEditMode = computed(() => !!props.service);
-  
-  // --- Zod schema
+
+  // Zod validation schema
   const serviceSchema = toTypedSchema(z.object({
     name: z.string().min(2, 'Name is required'),
-    price: z.coerce.number().min(2, 'Price must be a number'),
+    price: z.coerce.number().min(2, 'Price must be a valid number'),
     description: z.string().min(5, 'Description is required'),
   }));
-  
-  // --- VeeValidate form
-  const { handleSubmit, values, isSubmitting } = useForm({
+
+  // VeeValidate form
+  const { handleSubmit, values, isSubmitting, setValues } = useForm({
     validationSchema: serviceSchema,
     initialValues: {
       name: props.service?.name ?? '',
-      price: props.service?.price ?? 0,
+      price: props.service?.price ?? 0.0,
       description: props.service?.description ?? '',
     }
   });
-  
-  // --- Form submission
+
+  // Watch for changes to service prop and update form values if in edit mode
+  watch(() => props.service, (newService) => {
+    if (newService) {
+      setValues({
+        name: newService.name,
+        price: newService.price,
+        description: newService.description,
+      });
+    }
+  });
+
+  // Form submission handler (create or update)
   const onSubmit = handleSubmit((data) => {
     if (isEditMode.value && props.service) {
-      useInertiaForm(data).put(route('services.update', props.service.id), {
+      useInertiaForm(data).put(route('admin.services.update', props.service.id), {
         preserveScroll: true,
         onSuccess: () => emit('close'),
       });
     } else {
-      useInertiaForm(data).post(route('services.store'), {
+      useInertiaForm(data).post(route('admin.services.store'), {
         preserveScroll: true,
         onSuccess: () => emit('close'),
       });
     }
   });
+  
   </script>
   

@@ -5,8 +5,10 @@ import { MoreHorizontal } from 'lucide-vue-next'
 
 import type { Service } from '@/types/service'
 
+const emit = defineEmits(['edit', 'delete']);
+
 const props = defineProps<{
-  item: Service
+  item: any
 }>()
 
 </script>
@@ -21,13 +23,10 @@ const props = defineProps<{
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end">
       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-      <!-- <DropdownMenuItem @click="copy(item.id)">
-        View
-      </DropdownMenuItem>
-      <DropdownMenuSeparator /> -->
+
       <DropdownMenuItem  @click="$emit('edit', item)" >Edit</DropdownMenuItem>
       <DropdownMenuItem  @click="$emit('delete', item)" class="text-red-600">Delete</DropdownMenuItem>
-      
+    
     </DropdownMenuContent>
   </DropdownMenu>
 </template>
