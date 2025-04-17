@@ -7,8 +7,8 @@ export interface Staff {
     email: string;
     phone?: string;
     address?: string;
-    emergencyContact?: string;
+    emergency_contact?: string;
     commission: number;
-    specialization: Service[];
+
     created_at: string;
 }

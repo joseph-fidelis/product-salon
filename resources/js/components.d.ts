@@ -105,6 +105,8 @@ declare module 'vue' {
     PopoverAnchor: typeof import('./components/ui/popover/PopoverAnchor.vue')['default']
     PopoverContent: typeof import('./components/ui/popover/PopoverContent.vue')['default']
     PopoverTrigger: typeof import('./components/ui/popover/PopoverTrigger.vue')['default']
+    RouterLink: typeof import('vue-router')['RouterLink']
+    RouterView: typeof import('vue-router')['RouterView']
     Separator: typeof import('./components/ui/separator/Separator.vue')['default']
     ServiceDialog: typeof import('./components/dialog/ServiceDialog.vue')['default']
     Sheet: typeof import('./components/ui/sheet/Sheet.vue')['default']

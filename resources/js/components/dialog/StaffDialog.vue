@@ -4,10 +4,15 @@
         <DialogHeader>
           <DialogTitle>{{ isEditMode ? 'Edit Staff' : 'Add Staff' }}</DialogTitle>
         </DialogHeader>
-  
+
+        <!-- Display the exact error message from the backend -->
+        <div v-if="formError" class="mb-4 p-3 bg-red-100 border border-red-300 rounded-md text-red-600 text-sm">
+          {{ formError }}
+        </div>
+
         <form @submit="onSubmit" class="space-y-6 py-4">
           <!-- First Name -->
-          <FormField v-slot="{ componentField }" name="firstName">
+          <FormField v-slot="{ componentField }" name="first_name">
             <FormItem>
               <FormLabel>First Name</FormLabel>
               <FormControl>
@@ -16,9 +21,9 @@
               <FormMessage />
             </FormItem>
           </FormField>
-  
+
           <!-- Last Name -->
-          <FormField v-slot="{ componentField }" name="lastName">
+          <FormField v-slot="{ componentField }" name="last_name">
             <FormItem>
               <FormLabel>Last Name</FormLabel>
               <FormControl>
@@ -27,7 +32,7 @@
               <FormMessage />
             </FormItem>
           </FormField>
-  
+
           <!-- Email -->
           <FormField v-slot="{ componentField }" name="email">
             <FormItem>
@@ -38,7 +43,7 @@
               <FormMessage />
             </FormItem>
           </FormField>
-  
+
           <!-- Phone -->
           <FormField v-slot="{ componentField }" name="phone">
             <FormItem>
@@ -49,7 +54,7 @@
               <FormMessage />
             </FormItem>
           </FormField>
-  
+
           <!-- Address -->
           <FormField v-slot="{ componentField }" name="address">
             <FormItem>
@@ -60,7 +65,7 @@
               <FormMessage />
             </FormItem>
           </FormField>
-  
+
           <!-- Commission -->
           <FormField v-slot="{ componentField }" name="commission">
             <FormItem>
@@ -72,63 +77,9 @@
               <FormMessage />
             </FormItem>
           </FormField>
-  
-          <!-- Specializations (Multi-select) -->
-          <FormField v-slot="{ value, handleChange }" name="specialization">
-            <FormItem>
-              <FormLabel>Specializations</FormLabel>
-              <FormControl>
-                <Popover v-model:open="openPopOver">
-                  <PopoverTrigger as-child>
-                    <div class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm hover:cursor-pointer">
-                      <span class="truncate">
-                        {{ value?.length
-                          ? servicesList.filter(s => value.includes(s.id)).map(s => s.name).join(', ')
-                          : 'Select services...' }}
-                      </span>
-                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 opacity-50" fill="none"
-                           viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent class="w-[300px] p-0">
-                    <Command>
-                      <CommandInput placeholder="Search services..." />
-                      <CommandList>
-                        <CommandItem
-                          v-for="service in servicesList"
-                          :key="service.id"
-                          @select.prevent
-                        >
-                          <div class="flex items-center space-x-2">
-                            <Checkbox
-                              :checked="value?.includes(service.id)"
-                              @update:checked="(checked) => {
-                                let updated = [...(value || [])];
-                                if (checked) {
-                                  updated.push(service.id);
-                                } else {
-                                  updated = updated.filter((id) => id !== service.id);
-                                }
-                                handleChange(updated);
-                              }"
-                            />
-                            <span>{{ service.name }}</span>
-                          </div>
-                        </CommandItem>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
-  
+
           <!-- Emergency Contact -->
-          <FormField v-slot="{ componentField }" name="emergencyContact">
+          <FormField v-slot="{ componentField }" name="emergency_contact">
             <FormItem>
               <FormLabel>Emergency Contact</FormLabel>
               <FormControl>
@@ -137,7 +88,7 @@
               <FormMessage />
             </FormItem>
           </FormField>
-  
+
           <DialogFooter>
             <Button type="submit" :disabled="isSubmitting">
               {{ isEditMode ? 'Update' : 'Create' }}
@@ -150,7 +101,7 @@
       </DialogContent>
     </Dialog>
   </template>
-  
+
   <script setup lang="ts">
   import { ref, watch, computed } from 'vue';
   import { useForm } from 'vee-validate';
@@ -166,88 +117,132 @@
   import {
     FormField, FormItem, FormLabel, FormControl, FormMessage
   } from '@/components/ui/form';
-  import {
-    Popover, PopoverContent, PopoverTrigger,
-  } from '@/components/ui/popover';
-  import {
-    Command, CommandInput, CommandItem, CommandList,
-  } from '@/components/ui/command';
-  import { Checkbox } from '@/components/ui/checkbox';
   import type { Staff } from '@/types/staff';
-  import type { Service } from '@/types/service';
-  
-  // Define props; note, we make services optional by adding "?" and then using a fallback.
+
+  // Define props with optional properties
   const props = defineProps<{
     open: boolean;
     staff?: Staff | null;
-    services?: Service[];  // services is now optional.
+    isAdding?: boolean;
   }>();
-  
-  // Use a fallback to ensure services is always an array.
-  const servicesList = props.services || [];
-  
-  const openPopOver = ref(false);
-  const emit = defineEmits(['close']);
+
+  const emit = defineEmits(['close', 'updated']);
   const isOpen = ref(props.open);
-  
-  watch(() => props.open, (val) => isOpen.value = val);
-  watch(isOpen, (val) => { if (!val) emit('close') });
-  
+  const formError = ref('');
+
+  watch(() => props.open, (val) => {
+    isOpen.value = val;
+    if (val) {
+      // Reset error when dialog opens
+      formError.value = '';
+    }
+  });
+
+  watch(isOpen, (val) => {
+    if (!val) emit('close');
+  });
+
   const isEditMode = computed(() => !!props.staff);
-  
+
   const staffSchema = toTypedSchema(z.object({
-    firstName: z.string().min(4, 'First name is required'),
-    lastName: z.string().min(4, 'Last name is required'),
-    email: z.string().email('Email is required'),
-    address: z.string(),
-    phone: z.string().min(11, 'Phone number is required'),
+    first_name: z.string().min(2, 'First name is required'),
+    last_name: z.string().min(2, 'Last name is required'),
+    email: z.string().email('Valid email is required'),
+    address: z.string().optional().or(z.literal('')),
+    phone: z.string().min(10, 'Phone number is required'),
     commission: z.number().min(0, 'Commission is required').max(99, 'Commission must be less than 100'),
-    emergencyContact: z.string().min(10, 'Emergency contact is required'),
-    specialization: z.array(z.number()).nullable(),  // allow null
+    emergency_contact: z.string().min(10, 'Emergency contact is required')
   }));
-  
+
   const { handleSubmit, values, isSubmitting, setValues } = useForm({
     validationSchema: staffSchema,
     initialValues: {
-      firstName: props.staff?.firstName ?? '',
-      lastName: props.staff?.lastName ?? '',
+      first_name: props.staff?.first_name ?? '',
+      last_name: props.staff?.last_name ?? '',
       email: props.staff?.email ?? '',
       address: props.staff?.address ?? '',
       phone: props.staff?.phone ?? '',
       commission: props.staff?.commission ?? 0,
-      emergencyContact: props.staff?.emergencyContact ?? '',
-      specialization: props.staff?.specialization?.map(s => s.id) ?? [],
+      emergency_contact: props.staff?.emergency_contact ?? '',
     }
   });
-  
+
   watch(() => props.staff, (newStaff) => {
     if (newStaff) {
       setValues({
-        firstName: newStaff.firstName,
-        lastName: newStaff.lastName,
+        first_name: newStaff.first_name,
+        last_name: newStaff.last_name,
         email: newStaff.email,
         address: newStaff.address ?? '',
         phone: newStaff.phone,
-        commission: newStaff.commission,
-        emergencyContact: newStaff.emergencyContact,
-        specialization: newStaff.specialization?.map(s => s.id) ?? [],
+        commission: newStaff.commission ?? 0,
+        emergency_contact: newStaff.emergency_contact
       });
+      // Reset error
+      formError.value = '';
     }
   });
-  
+
   const onSubmit = handleSubmit((data) => {
+    // Reset error state
+    formError.value = '';
+
     const form = useInertiaForm(data);
+
     if (isEditMode.value && props.staff) {
       form.put(route('admin.staff.update', props.staff.id), {
         preserveScroll: true,
-        onSuccess: () => emit('close'),
+        onSuccess: () => {
+          emit('close');
+          emit('updated');
+        },
+        onError: (errors) => {
+          // Display the exact error message from the backend
+          console.log('Form errors:', errors);
+
+          // Check if we have a specific error message
+          if (errors.error) {
+            formError.value = errors.error;
+          }
+          // Check for email error
+          else if (errors.email) {
+            formError.value = errors.email;
+          }
+          // If we have any errors but no specific one to display
+          else if (Object.keys(errors).length > 0) {
+            // Get the first error message
+            const firstErrorKey = Object.keys(errors)[0];
+            formError.value = errors[firstErrorKey];
+          }
+        }
       });
     } else {
       form.post(route('admin.staff.store'), {
         preserveScroll: true,
-        onSuccess: () => emit('close'),
+        onSuccess: () => {
+          emit('close');
+          emit('updated');
+        },
+        onError: (errors) => {
+          // Display the exact error message from the backend
+          console.log('Form errors:', errors);
+
+          // Check if we have a specific error message
+          if (errors.error) {
+            formError.value = errors.error;
+          }
+          // Check for email error
+          else if (errors.email) {
+            formError.value = errors.email;
+          }
+          // If we have any errors but no specific one to display
+          else if (Object.keys(errors).length > 0) {
+            // Get the first error message
+            const firstErrorKey = Object.keys(errors)[0];
+            formError.value = errors[firstErrorKey];
+          }
+        }
       });
     }
   });
   </script>
-  
