@@ -21,7 +21,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Appointments',
-        href: '/admin/appointment',
+        href: '/admin/appointments',
         icon: Calendar,
     },
     {

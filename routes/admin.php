@@ -55,7 +55,7 @@ Route::prefix('admin')->group(function () {
         Route::post('/record', [CommissionController::class, 'recordManual'])->name('record.manual');
     });
 
-    Route::prefix('appointments')->name('appointments.')->group(function () {
+    Route::prefix('appointments')->name('admin.appointments.')->group(function () {
         Route::get('/', [AppointmentController::class, 'index'])->name('index');
         Route::get('/create', [AppointmentController::class, 'create'])->name('create');
         Route::post('/', [AppointmentController::class, 'store'])->name('store');
