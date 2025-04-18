@@ -25,6 +25,11 @@ const mainNavItems: NavItem[] = [
         icon: Calendar,
     },
     {
+        title: 'Commissions',
+        href: '/admin/commission',
+        icon: Calendar,
+    },
+    {
         title: 'Staff',
         href: '/admin/staff',
         icon: Users,
