@@ -2,7 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/vue3';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 
 const props = defineProps({
     invoices: {
@@ -19,10 +19,29 @@ const props = defineProps({
     }
 });
 
-// Debug what data we're receiving
+// Debug what data we're receiving with more detail
 onMounted(() => {
     console.log('Invoices:', props.invoices);
     console.log('Pagination:', props.pagination);
+    // Add more detailed debugging
+    if (props.invoices && props.invoices.length > 0) {
+        console.log('First invoice:', props.invoices[0]);
+        console.log('Invoice keys:', Object.keys(props.invoices[0]));
+    }
+    // Check if data might be nested
+    if (props.invoices && props.invoices.data) {
+        console.log('Data is nested. First invoice:', props.invoices.data[0]);
+    }
+});
+
+// Process invoices data - handle both array and paginated object formats
+const processedInvoices = computed(() => {
+    // Handle case where Laravel returns paginated data with a "data" property
+    if (props.invoices && 'data' in props.invoices) {
+        return props.invoices.data || [];
+    }
+    // Handle case where it's directly an array
+    return props.invoices || [];
 });
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -102,7 +121,7 @@ const handleDelete = (invoiceId) => {
                 <h1 class="text-2xl font-semibold">Invoices</h1>
                 <Link
                     href="/admin/invoice/generate"
-                    class="flex items-center rounded-lg bg-primary px-4 py-2 text-white hover:bg-primary/90"
+                    class="flex items-center rounded-lg bg-primary px-4 py-2 text-black hover:bg-primary/90"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
@@ -138,7 +157,7 @@ const handleDelete = (invoiceId) => {
 
                     <button
                         @click="submitSearch"
-                        class="rounded-lg bg-primary px-4 py-2 text-white hover:bg-primary/90"
+                        class="rounded-lg bg-primary px-4 py-2 text-black hover:bg-primary/90"
                     >
                         Apply Filters
                     </button>
@@ -160,7 +179,7 @@ const handleDelete = (invoiceId) => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="invoice in invoices || []" :key="invoice?.id" class="border-b">
+                            <tr v-for="invoice in processedInvoices" :key="invoice?.id" class="border-b">
                                 <td class="whitespace-nowrap py-4 pr-4">#{{ invoice?.id || 'N/A' }}</td>
                                 <td class="whitespace-nowrap py-4 pr-4">{{ invoice?.customer_name || 'N/A' }}</td>
                                 <td class="whitespace-nowrap py-4 pr-4">{{ formatDate(invoice?.invoice_date) }}</td>
@@ -210,7 +229,7 @@ const handleDelete = (invoiceId) => {
                                     </div>
                                 </td>
                             </tr>
-                            <tr v-if="!invoices || invoices.length === 0">
+                            <tr v-if="!processedInvoices || processedInvoices.length === 0">
                                 <td colspan="6" class="py-4 text-center text-gray-500">No invoices found</td>
                             </tr>
                         </tbody>
