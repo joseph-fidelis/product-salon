@@ -406,7 +406,7 @@ class AppointmentController extends Controller
             }
 
             // Calculate tax and total
-            $tax = $subtotal * 0.07; // 7% tax
+            $tax = $subtotal * 0.00; // 7% tax
             $total = $subtotal + $tax;
 
             // Update invoice with totals
