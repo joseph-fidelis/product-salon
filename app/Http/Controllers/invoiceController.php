@@ -6,6 +6,7 @@ use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Service;
 use App\Models\Staff;
+use App\Models\Commission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -62,7 +63,7 @@ class InvoiceController extends Controller
     public function create()
     {
         $services = Service::select('id', 'name', 'price', 'timeEstimate')->get();
-        $staff = Staff::select('id', 'first_name', 'last_name', 'commission_rate as commission')->get();
+        $staff = Staff::select('id', 'first_name', 'last_name', 'commission')->get();
 
         return Inertia::render('admin/InvoiceGenerator', [
             'services' => $services,
@@ -129,7 +130,7 @@ class InvoiceController extends Controller
                 $staff = Staff::find($item['staff_id']);
 
                 // Calculate commission
-                $commission = $itemTotal * ($staff->commission_rate / 100);
+                $commission = $itemTotal * ($staff->commission/ 100);
 
                 InvoiceItem::create([
                     'invoice_id' => $invoice->id,
@@ -147,7 +148,7 @@ class InvoiceController extends Controller
                 // Create commission record
                 if ($commission > 0) {
                     // Assuming you have a Commission model
-                    \App\Models\Commission::create([
+                    Commission::create([
                         'invoice_id' => $invoice->id,
                         'staff_id' => $item['staff_id'],
                         'service_id' => $item['service_id'],
@@ -204,24 +205,55 @@ class InvoiceController extends Controller
         ]);
     }
 
+    /**
+     * Mark an invoice as paid and record commissions for staff
+     */
     public function markAsPaid(Invoice $invoice)
     {
-        // Update the invoice status to paid
-        $invoice->update([
-            'status' => 'Paid'
-        ]);
+        // Start a database transaction
+        DB::beginTransaction();
 
-        // Update related commissions to paid as well
-        if ($invoice->commissions) {
-            $invoice->commissions()->update([
+        try {
+            // Update the invoice status to paid
+            $invoice->update([
                 'status' => 'Paid'
             ]);
+
+            // Load invoice items if not already loaded
+            if (!$invoice->relationLoaded('items')) {
+                $invoice->load('items');
+            }
+
+            // Get existing commissions
+            $existingCommissions = Commission::where('invoice_id', $invoice->id)->get();
+
+            // If no commissions exist yet, create them based on invoice items but keep them as pending
+            if ($existingCommissions->isEmpty()) {
+                foreach ($invoice->items as $item) {
+                    // Only create commission if the amount is greater than zero
+                    if ($item->commission > 0) {
+                        Commission::create([
+                            'invoice_id' => $invoice->id,
+                            'staff_id' => $item->staff_id,
+                            'service_id' => $item->service_id,
+                            'amount' => $item->commission,
+                            'date' => $invoice->invoice_date,
+                            'status' => 'Pending', // Set as Pending even though invoice is paid
+                        ]);
+                    }
+                }
+            }
+            // Do NOT update existing commissions to paid
+
+            DB::commit();
+
+            return redirect()->route('admin.invoice.show', $invoice->id)
+                ->with('success', 'Invoice marked as paid. Staff commissions are pending approval.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Failed to mark invoice as paid. ' . $e->getMessage()]);
         }
-
-        return redirect()->route('admin.invoice.show', $invoice->id)
-            ->with('success', 'Invoice marked as paid successfully.');
     }
-
 
     /**
      * Update the specified invoice in storage.
@@ -287,7 +319,7 @@ class InvoiceController extends Controller
                 $staff = Staff::find($item['staff_id']);
 
                 // Calculate commission
-                $commission = $itemTotal * ($staff->commission_rate / 100);
+                $commission = $itemTotal * ($staff->commission / 100);
 
                 InvoiceItem::create([
                     'invoice_id' => $invoice->id,
@@ -304,7 +336,7 @@ class InvoiceController extends Controller
 
                 // Create commission record
                 if ($commission > 0) {
-                    \App\Models\Commission::create([
+                    Commission::create([
                         'invoice_id' => $invoice->id,
                         'staff_id' => $item['staff_id'],
                         'service_id' => $item['service_id'],

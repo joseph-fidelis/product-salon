@@ -5,6 +5,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\CommissionController;
 
 Route::prefix('admin')->middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
@@ -43,6 +44,15 @@ Route::prefix('admin')->group(function () {
     Route::get('/invoice/{invoice}', [InvoiceController::class, 'show'])->name('admin.invoice.show');
     Route::put('/invoice/{invoice}/mark-paid', [InvoiceController::class, 'markAsPaid'])->name('admin.invoice.mark-paid');
     Route::delete('/invoice/{invoice}', [InvoiceController::class, 'destroy'])->name('admin.invoice.destroy');
+
+    Route::prefix('commission')->name('commission.')->group(function () {
+        Route::get('/', [CommissionController::class, 'index'])->name('index');
+        Route::get('/statistics', [CommissionController::class, 'statistics'])->name('statistics');
+        Route::get('/staff/{staff}', [CommissionController::class, 'staffSummary'])->name('staff.summary');
+        Route::put('/{commission}/status', [CommissionController::class, 'updateStatus'])->name('update.status');
+        Route::post('/batch-update', [CommissionController::class, 'batchUpdate'])->name('batch.update');
+        Route::post('/record', [CommissionController::class, 'recordManual'])->name('record.manual');
+    });
 
     // Staff routes
     Route::get('staff', [StaffController::class, 'index'])->middleware(['auth', 'verified'])->name('admin.staff.index');

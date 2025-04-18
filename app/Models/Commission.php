@@ -12,7 +12,7 @@ class Commission extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var array
+     * @var array<int, string>
      */
     protected $fillable = [
         'invoice_id',
@@ -21,28 +21,11 @@ class Commission extends Model
         'amount',
         'date',
         'status',
+        'notes'
     ];
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'amount' => 'float',
-        'date' => 'date',
-    ];
-
-    /**
-     * Get the invoice associated with the commission.
-     */
-    public function invoice()
-    {
-        return $this->belongsTo(Invoice::class);
-    }
-
-    /**
-     * Get the staff member associated with the commission.
+     * Get the staff member that earned the commission.
      */
     public function staff()
     {
@@ -50,10 +33,54 @@ class Commission extends Model
     }
 
     /**
-     * Get the service associated with the commission.
+     * Get the invoice that generated the commission.
+     */
+    public function invoice()
+    {
+        return $this->belongsTo(Invoice::class);
+    }
+
+    /**
+     * Get the service related to this commission.
      */
     public function service()
     {
         return $this->belongsTo(Service::class);
+    }
+
+    /**
+     * Scope a query to only include paid commissions.
+     */
+    public function scopePaid($query)
+    {
+        return $query->where('status', 'Paid');
+    }
+
+    /**
+     * Scope a query to only include pending commissions.
+     */
+    public function scopePending($query)
+    {
+        return $query->where('status', 'Pending');
+    }
+
+    /**
+     * Scope a query to filter by date range.
+     */
+    public function scopeDateRange($query, $from, $to)
+    {
+        if ($from && $to) {
+            return $query->whereBetween('date', [$from, $to]);
+        }
+
+        if ($from) {
+            return $query->where('date', '>=', $from);
+        }
+
+        if ($to) {
+            return $query->where('date', '<=', $to);
+        }
+
+        return $query;
     }
 }

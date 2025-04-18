@@ -95,19 +95,15 @@ const submitSearch = () => {
 };
 
 // Safe delete handler with null check
-const handleDelete = (invoiceId) => {
+const handleDelete = (invoiceId: number) => {
     if (!invoiceId) {
         console.error('Cannot delete: Invoice ID is missing');
         return;
     }
 
     if (confirm('Are you sure you want to delete this invoice?')) {
-        const { $inertia } = window as any;
-        if ($inertia) {
-            $inertia.delete(`/admin/invoice/${invoiceId}`);
-        } else {
-            console.error('Inertia is not available');
-        }
+        // Use the imported router instead of accessing window.$inertia
+        router.delete(`/admin/invoice/${invoiceId}`);
     }
 };
 </script>
