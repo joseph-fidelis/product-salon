@@ -38,7 +38,7 @@ import ThemeSwitcher from '@/Components/ThemeSwitcher.vue';
                         class="inline-block rounded-sm px-5 py-1.5 text-sm leading-normal hover:text-red-500 dark:hover:text-red-400 transition-colors duration-300">
                     Contact
                     </Link>
-                    <Link :href="route('book-appointment')"
+                    <Link :href="route('booking.form')"
                         class="inline-block px-6 py-3 text-sm font-medium bg-red-500 text-white rounded-sm hover:bg-red-600 transition-colors">
                     Book Appointment
                     </Link>

@@ -6,9 +6,9 @@ import { Link } from '@inertiajs/vue3';
 <div class="relative w-full  mx-auto mt-8 overflow-hidden rounded-lg">
     <!-- Background Image with Overlay -->
     <div class="absolute inset-0">
-        <img 
-            src="/../../images/call-to-action-background.jpg" 
-            alt="Background" 
+        <img
+            src="/../../images/call-to-action-background.jpg"
+            alt="Background"
             class="w-full h-full object-cover"
         />
         <div class="absolute inset-0 bg-black/50 dark:bg-black/70"></div>
@@ -23,10 +23,10 @@ import { Link } from '@inertiajs/vue3';
                 </h1>
             </div>
             <div class="flex justify-center">
-                <Link :href="route('book-appointment')"
+                <Link :href="route('booking.form')"
                     class="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium bg-red-500 text-white rounded-sm hover:bg-red-600 transition-colors">
                     Book Appointment
-                    
+
                 </Link>
             </div>
         </div>

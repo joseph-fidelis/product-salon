@@ -16,7 +16,7 @@ import { Link } from '@inertiajs/vue3';
         <div class="relative h-full w-full flex flex-col items-center justify-center text-center px-6 max-w-7xl mx-auto">
             <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
                 WELCOME TO AVERETTE
-                
+
             </h1>
             <h2 class="text-red-500 text-4xl md:text-5xl lg:text-6xl font-bold mb-4">UNISEX SALON</h2>
             <p class="text-lg text-gray-200 mb-8 max-w-2xl my-8">
@@ -24,7 +24,7 @@ import { Link } from '@inertiajs/vue3';
             </p>
 
             <div class="flex flex-col sm:flex-row gap-4">
-                <Link :href="route('book-appointment')"
+                <Link :href="route('booking.form')"
                     class="px-8 py-3 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-300">
                 Book Now
                 </Link>
@@ -36,5 +36,5 @@ import { Link } from '@inertiajs/vue3';
             </div>
         </div>
     </div>
-    
+
 </template>

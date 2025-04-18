@@ -6,6 +6,7 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\CommissionController;
+use App\Http\Controllers\AppointmentController;
 
 Route::prefix('admin')->middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
@@ -52,6 +53,18 @@ Route::prefix('admin')->group(function () {
         Route::put('/{commission}/status', [CommissionController::class, 'updateStatus'])->name('update.status');
         Route::post('/batch-update', [CommissionController::class, 'batchUpdate'])->name('batch.update');
         Route::post('/record', [CommissionController::class, 'recordManual'])->name('record.manual');
+    });
+
+    Route::prefix('appointments')->name('appointments.')->group(function () {
+        Route::get('/', [AppointmentController::class, 'index'])->name('index');
+        Route::get('/create', [AppointmentController::class, 'create'])->name('create');
+        Route::post('/', [AppointmentController::class, 'store'])->name('store');
+        Route::get('/{appointment}', [AppointmentController::class, 'show'])->name('show');
+        Route::put('/{appointment}', [AppointmentController::class, 'update'])->name('update');
+        Route::put('/{appointment}/status', [AppointmentController::class, 'updateStatus'])->name('update.status');
+        Route::put('/{appointment}/assign-staff', [AppointmentController::class, 'assignStaff'])->name('assign.staff');
+        Route::post('/{appointment}/convert-to-invoice', [AppointmentController::class, 'convertToInvoice'])->name('convert.invoice');
+        Route::delete('/{appointment}', [AppointmentController::class, 'destroy'])->name('destroy');
     });
 
     // Staff routes

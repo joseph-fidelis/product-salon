@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\AppointmentController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -18,10 +19,12 @@ Route::get('/contact', function () {
     return Inertia::render('Contact');
 })->name('contact');
 
-Route::get('/book-appointment', function () {
-    return Inertia::render('BookAppointment');
-})->name('book-appointment');
+// Route::get('/book-appointment', function () {
+//     return Inertia::render('BookAppointment');
+// })->name('book-appointment');
 
+Route::get('/book-appointment', [AppointmentController::class, 'showBookingForm'])->name('booking.form');
+Route::post('/book-appointment', [AppointmentController::class, 'storeFromPublic'])->name('booking.store');
 
 
 require __DIR__.'/admin.php';
