@@ -18,28 +18,26 @@ class InvoiceController extends Controller
     public function index(Request $request)
     {
         $query = Invoice::query()
-            ->with(['items'])
             ->orderBy('created_at', 'desc');
 
-        // Apply search filter
+        // Apply filters
         if ($request->has('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('customer_name', 'like', "%{$search}%")
-                  ->orWhere('customer_email', 'like', "%{$search}%")
                   ->orWhere('customer_phone', 'like', "%{$search}%")
                   ->orWhere('id', 'like', "%{$search}%");
             });
         }
 
-        // Apply status filter
         if ($request->has('status') && $request->input('status') !== '') {
             $query->where('status', $request->input('status'));
         }
 
-        $invoices = $query->paginate(10)
-            ->withQueryString()
-            ->through(function ($invoice) {
+        $invoices = $query->paginate(10);
+
+        return Inertia::render('admin/Invoice', [
+            'invoices' => $invoices->through(function ($invoice) {
                 return [
                     'id' => $invoice->id,
                     'customer_name' => $invoice->customer_name,
@@ -47,11 +45,14 @@ class InvoiceController extends Controller
                     'total' => $invoice->total,
                     'status' => $invoice->status,
                 ];
-            });
-
-        return Inertia::render('Invoice/Index', [
-            'invoices' => $invoices,
+            }),
             'filters' => $request->only(['search', 'status']),
+            'pagination' => [
+                'links' => $invoices->linkCollection()->toArray(),
+                'from' => $invoices->firstItem(),
+                'to' => $invoices->lastItem(),
+                'total' => $invoices->total()
+            ]
         ]);
     }
 
@@ -63,7 +64,7 @@ class InvoiceController extends Controller
         $services = Service::select('id', 'name', 'price', 'timeEstimate')->get();
         $staff = Staff::select('id', 'first_name', 'last_name', 'commission_rate as commission')->get();
 
-        return Inertia::render('Invoice/Create', [
+        return Inertia::render('admin/InvoiceGenerator', [
             'services' => $services,
             'staffMembers' => $staff,
         ]);
@@ -159,7 +160,7 @@ class InvoiceController extends Controller
 
             DB::commit();
 
-            return redirect()->route('invoice.show', $invoice->id)
+            return redirect()->route('admin.invoice.show', $invoice->id)
                 ->with('success', 'Invoice created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -174,7 +175,7 @@ class InvoiceController extends Controller
     {
         $invoice->load('items');
 
-        return Inertia::render('Invoice/Show', [
+        return Inertia::render('admin/InvoiceView', [
             'invoice' => [
                 'id' => $invoice->id,
                 'customer_name' => $invoice->customer_name,
@@ -203,46 +204,24 @@ class InvoiceController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for editing the specified invoice.
-     */
-    public function edit(Invoice $invoice)
+    public function markAsPaid(Invoice $invoice)
     {
-        $invoice->load('items');
-        $services = Service::select('id', 'name', 'price', 'timeEstimate')->get();
-        $staff = Staff::select('id', 'first_name', 'last_name', 'commission_rate as commission')->get();
-
-        return Inertia::render('Invoice/Edit', [
-            'invoice' => [
-                'id' => $invoice->id,
-                'customer_name' => $invoice->customer_name,
-                'customer_email' => $invoice->customer_email,
-                'customer_phone' => $invoice->customer_phone,
-                'invoice_date' => $invoice->invoice_date,
-                'payment_method' => $invoice->payment_method,
-                'subtotal' => $invoice->subtotal,
-                'tax' => $invoice->tax,
-                'total' => $invoice->total,
-                'notes' => $invoice->notes,
-                'status' => $invoice->status,
-                'invoice_items' => $invoice->items->map(function ($item) {
-                    return [
-                        'id' => $item->id,
-                        'service_id' => $item->service_id,
-                        'service_name' => $item->service_name,
-                        'staff_id' => $item->staff_id,
-                        'staff_name' => $item->staff_name,
-                        'quantity' => $item->quantity,
-                        'price' => $item->price,
-                        'discount' => $item->discount,
-                        'total' => $item->total,
-                    ];
-                }),
-            ],
-            'services' => $services,
-            'staffMembers' => $staff,
+        // Update the invoice status to paid
+        $invoice->update([
+            'status' => 'Paid'
         ]);
+
+        // Update related commissions to paid as well
+        if ($invoice->commissions) {
+            $invoice->commissions()->update([
+                'status' => 'Paid'
+            ]);
+        }
+
+        return redirect()->route('admin.invoice.show', $invoice->id)
+            ->with('success', 'Invoice marked as paid successfully.');
     }
+
 
     /**
      * Update the specified invoice in storage.
@@ -343,7 +322,7 @@ class InvoiceController extends Controller
 
             DB::commit();
 
-            return redirect()->route('invoice.show', $invoice->id)
+            return redirect()->route('admin.invoice.show', $invoice->id)
                 ->with('success', 'Invoice updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -369,7 +348,7 @@ class InvoiceController extends Controller
 
             DB::commit();
 
-            return redirect()->route('invoice.index')
+            return redirect()->route('admin.invoice')
                 ->with('success', 'Invoice deleted successfully.');
         } catch (\Exception $e) {
             DB::rollBack();

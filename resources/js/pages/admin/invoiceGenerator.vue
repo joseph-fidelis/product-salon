@@ -3,7 +3,11 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
-import { toast } from 'vue-sonner';
+
+const props = defineProps({
+  services: Array,
+  staffMembers: Array
+});
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -20,36 +24,52 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-// These would typically come from your backend
-const services = ref([
-    { id: 1, name: 'Haircut', price: 35.00, timeEstimate: 30 },
-    { id: 2, name: 'Hair Coloring', price: 85.00, timeEstimate: 120 },
-    { id: 3, name: 'Styling', price: 45.00, timeEstimate: 45 },
-    { id: 4, name: 'Manicure', price: 30.00, timeEstimate: 30 },
-    { id: 5, name: 'Pedicure', price: 40.00, timeEstimate: 45 },
-    { id: 6, name: 'Facial', price: 65.00, timeEstimate: 60 },
-]);
+interface Service {
+    id: number;
+    name: string;
+    price: number;
+    timeEstimate: number;
+}
 
-const staffMembers = ref([
-    { id: 1, first_name: 'John', last_name: 'Doe', commission: 20 },
-    { id: 2, first_name: 'Jane', last_name: 'Smith', commission: 25 },
-    { id: 3, first_name: 'Mike', last_name: 'Johnson', commission: 20 },
-    { id: 4, first_name: 'Sarah', last_name: 'Williams', commission: 22 },
-]);
+interface StaffMember {
+    id: number;
+    first_name: string;
+    last_name: string;
+    commission: number;
+}
+
+interface SelectedServiceItem {
+    service_id: string;
+    staff_id: string;
+    quantity: number;
+    price: number;
+    discount: number;
+}
+
+interface InvoiceItem {
+    service_id: string;
+    service_name: string;
+    staff_id: string;
+    staff_name: string;
+    quantity: number;
+    price: number;
+    discount: number;
+    total: number;
+    commission: number;
+}
 
 // Form for invoice generation
 const form = useForm({
     customer_name: '',
-    customer_email: '',
     customer_phone: '',
     invoice_date: new Date().toISOString().substr(0, 10),
-    invoice_items: [],
+    invoice_items: [] as InvoiceItem[],
     notes: '',
     payment_method: 'Cash',
 });
 
 // Track selected services with staff assigned to each
-const selectedServices = ref([]);
+const selectedServices = ref<SelectedServiceItem[]>([]);
 
 // Add a new service line item
 const addServiceItem = () => {
@@ -63,56 +83,49 @@ const addServiceItem = () => {
 };
 
 // Remove a service line item
-const removeServiceItem = (index) => {
+const removeServiceItem = (index: number) => {
     selectedServices.value.splice(index, 1);
 };
 
 // Get service details when a service is selected
-const updateServiceDetails = (index, serviceId) => {
-    const service = services.value.find(s => s.id === parseInt(serviceId));
+const updateServiceDetails = (index: number, serviceId: string) => {
+    const service = props.services.find(s => s.id === parseInt(serviceId));
     if (service) {
         selectedServices.value[index].price = service.price;
     }
 };
 
 // Calculate subtotal for a line item
-const calculateItemTotal = (item) => {
+const calculateItemTotal = (item: SelectedServiceItem) => {
     const subtotal = item.price * item.quantity;
     const discount = subtotal * (item.discount / 100);
     return subtotal - discount;
 };
 
-// Calculate invoice subtotal
-const subtotal = computed(() => {
+// Calculate invoice subtotal (which is also the total since there's no tax)
+const total = computed(() => {
     return selectedServices.value.reduce((sum, item) => sum + calculateItemTotal(item), 0);
 });
 
-// Calculate tax (assuming 7%)
-const tax = computed(() => {
-    return subtotal.value * 0.07;
-});
-
-// Calculate total
-const total = computed(() => {
-    return subtotal.value + tax.value;
-});
-
 // Calculate staff commission
-const getStaffCommission = (staffId, amount) => {
-    const staff = staffMembers.value.find(s => s.id === parseInt(staffId));
+const getStaffCommission = (staffId: string, amount: number) => {
+    const staff = props.staffMembers.find(s => s.id === parseInt(staffId));
     return staff ? (amount * staff.commission / 100) : 0;
 };
 
 // Submit the form
+// Submit the form
 const submitInvoice = () => {
     // Prepare the invoice items from selected services
     form.invoice_items = selectedServices.value.map(item => {
-        const service = services.value.find(s => s.id === parseInt(item.service_id));
+        const service = props.services.find(s => s.id === parseInt(item.service_id));
+        const staff = props.staffMembers.find(s => s.id === parseInt(item.staff_id));
+
         return {
             service_id: item.service_id,
             service_name: service ? service.name : '',
             staff_id: item.staff_id,
-            staff_name: staffMembers.value.find(s => s.id === parseInt(item.staff_id))?.last_name || '',
+            staff_name: staff ? `${staff.first_name} ${staff.last_name}` : '',
             quantity: item.quantity,
             price: item.price,
             discount: item.discount,
@@ -121,15 +134,24 @@ const submitInvoice = () => {
         };
     });
 
-    // Submit the form to your backend
+    // Submit the form to your backend using the correct route
     form.post('/admin/invoice/store', {
-        onSuccess: () => {
-            toast.success('Invoice created successfully');
+        onSuccess: (response) => {
+            // Clear the form and selected services
             selectedServices.value = [];
             form.reset();
+
+            // Manually redirect to the show page
+            const invoiceId = response?.invoice?.id;
+            if (invoiceId) {
+                window.location.href = `/admin/invoice/${invoiceId}`;
+            } else {
+                // Fallback to the invoice list if we can't get the ID
+                window.location.href = '/admin/invoice';
+            }
         },
-        onError: () => {
-            toast.error('Failed to create invoice');
+        onError: (errors) => {
+            console.error('Invoice submission errors:', errors);
         }
     });
 };
@@ -165,18 +187,6 @@ addServiceItem();
                                 placeholder="Enter customer name"
                             />
                             <p v-if="form.errors.customer_name" class="mt-1 text-sm text-red-500">{{ form.errors.customer_name }}</p>
-                        </div>
-
-                        <div>
-                            <label for="customer_email" class="mb-1 block text-sm">Email</label>
-                            <input
-                                id="customer_email"
-                                v-model="form.customer_email"
-                                type="email"
-                                class="w-full rounded-lg border border-sidebar-border/70 px-3 py-2"
-                                placeholder="Enter email address"
-                            />
-                            <p v-if="form.errors.customer_email" class="mt-1 text-sm text-red-500">{{ form.errors.customer_email }}</p>
                         </div>
 
                         <div>
@@ -223,17 +233,9 @@ addServiceItem();
                 <div class="rounded-xl border border-sidebar-border/70 p-6">
                     <h2 class="mb-4 text-lg font-medium">Invoice Summary</h2>
                     <div class="flex flex-col gap-4">
-                        <div class="flex items-center justify-between border-b border-sidebar-border/50 pb-2">
-                            <span class="text-sm">Subtotal:</span>
-                            <span>${{ subtotal.toFixed(2) }}</span>
-                        </div>
-                        <div class="flex items-center justify-between border-b border-sidebar-border/50 pb-2">
-                            <span class="text-sm">Tax (7%):</span>
-                            <span>${{ tax.toFixed(2) }}</span>
-                        </div>
                         <div class="flex items-center justify-between pt-2">
                             <span class="font-medium">Total:</span>
-                            <span class="text-lg font-semibold">${{ total.toFixed(2) }}</span>
+                            <span class="text-lg font-semibold">₦{{ total.toFixed(2) }}</span>
                         </div>
                     </div>
 
@@ -288,7 +290,7 @@ addServiceItem();
                                     >
                                         <option value="" disabled>Select service</option>
                                         <option v-for="service in services" :key="service.id" :value="service.id">
-                                            {{ service.name }} (${{ service.price }})
+                                            {{ service.name }} (₦{{ service.price }})
                                         </option>
                                     </select>
                                 </td>
@@ -329,7 +331,7 @@ addServiceItem();
                                         class="w-16 rounded-lg border border-sidebar-border/70 px-2 py-1 text-sm"
                                     />
                                 </td>
-                                <td class="py-3 pr-3">${{ calculateItemTotal(item).toFixed(2) }}</td>
+                                <td class="py-3 pr-3">₦{{ calculateItemTotal(item).toFixed(2) }}</td>
                                 <td class="py-3">
                                     <button
                                         @click="removeServiceItem(index)"

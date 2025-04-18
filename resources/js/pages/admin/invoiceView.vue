@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 const props = defineProps({
@@ -30,8 +30,30 @@ const printInvoice = () => {
     window.print();
 };
 
+// Mark invoice as paid
+const markAsPaid = () => {
+    if (confirm('Are you sure you want to mark this invoice as paid?')) {
+        router.put(`/admin/invoice/${props.invoice.id}/mark-paid`, {}, {
+            onSuccess: () => {
+                // This will be handled by the controller redirect
+            }
+        });
+    }
+};
+
+// Delete invoice
+const deleteInvoice = () => {
+    if (confirm('Are you sure you want to delete this invoice? This action cannot be undone.')) {
+        router.delete(`/admin/invoice/${props.invoice.id}`, {
+            onSuccess: () => {
+                // This will be handled by the controller redirect
+            }
+        });
+    }
+};
+
 // Format date (YYYY-MM-DD to DD/MM/YYYY)
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString();
@@ -53,12 +75,26 @@ const formatDate = (dateString) => {
                         Print Invoice
                     </button>
 
-                    <a :href="`/admin/invoice/${invoice.id}/edit`" class="flex items-center rounded-lg bg-primary px-4 py-2 text-white hover:bg-primary/90">
+                    <button
+                        v-if="invoice.status !== 'Paid'"
+                        @click="markAsPaid"
+                        class="flex items-center rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+                    >
                         <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        Edit Invoice
-                    </a>
+                        Mark as Paid
+                    </button>
+
+                    <button
+                        @click="deleteInvoice"
+                        class="flex items-center rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Delete Invoice
+                    </button>
                 </div>
             </div>
 
@@ -77,7 +113,6 @@ const formatDate = (dateString) => {
                             123 Salon Street<br>
                             City, State 12345<br>
                             Phone: (123) 456-7890<br>
-                            Email: info@yoursalon.com
                         </address>
                     </div>
                 </div>
@@ -87,7 +122,7 @@ const formatDate = (dateString) => {
                     <div>
                         <h3 class="mb-2 font-medium">Bill To:</h3>
                         <p class="text-sm">{{ invoice.customer_name }}</p>
-                        <p class="text-sm">{{ invoice.customer_email }}</p>
+                        <p class="text-sm" v-if="invoice.customer_email">{{ invoice.customer_email }}</p>
                         <p class="text-sm">{{ invoice.customer_phone }}</p>
                     </div>
                     <div class="sm:text-right">
@@ -125,9 +160,9 @@ const formatDate = (dateString) => {
                                 <td class="py-3 text-sm">{{ item.service_name }}</td>
                                 <td class="py-3 text-sm">{{ item.staff_name }}</td>
                                 <td class="py-3 text-sm">{{ item.quantity }}</td>
-                                <td class="py-3 text-sm">${{ item.price.toFixed(2) }}</td>
+                                <td class="py-3 text-sm">₦{{ item.price.toFixed(2) }}</td>
                                 <td class="py-3 text-sm">{{ item.discount }}%</td>
-                                <td class="py-3 text-right text-sm">${{ item.total.toFixed(2) }}</td>
+                                <td class="py-3 text-right text-sm">₦{{ item.total.toFixed(2) }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -138,15 +173,15 @@ const formatDate = (dateString) => {
                     <div class="w-full max-w-xs">
                         <div class="flex justify-between border-b border-sidebar-border/50 py-2">
                             <span class="text-sm">Subtotal:</span>
-                            <span class="text-sm">${{ invoice.subtotal.toFixed(2) }}</span>
+                            <span class="text-sm">₦{{ invoice.subtotal.toFixed(2) }}</span>
                         </div>
                         <div class="flex justify-between border-b border-sidebar-border/50 py-2">
                             <span class="text-sm">Tax (7%):</span>
-                            <span class="text-sm">${{ invoice.tax.toFixed(2) }}</span>
+                            <span class="text-sm">₦{{ invoice.tax.toFixed(2) }}</span>
                         </div>
                         <div class="flex justify-between py-2">
                             <span class="font-medium">Total:</span>
-                            <span class="font-bold">${{ invoice.total.toFixed(2) }}</span>
+                            <span class="font-bold">₦{{ invoice.total.toFixed(2) }}</span>
                         </div>
                     </div>
                 </div>
