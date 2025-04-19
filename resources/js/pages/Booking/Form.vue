@@ -20,11 +20,18 @@ const form = useForm({
     name: '',
     email: '',
     phone: '',
+    referral_code: '', // Added referral_code to the form data
     booking_date: '',
     booking_time: '',
     service_id: '',
     message: ''
 });
+
+// You can add validation for the referral code if needed
+const validateReferralCode = (code) => {
+    // Example validation - implement according to your business rules
+    return code.length <= 15; // For example, ensuring the code is not too long
+};
 
 // Selected service details
 const selectedService = computed(() => {
@@ -97,6 +104,15 @@ const formatCurrency = (amount) => {
                             class="px-4 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:border-gray-600"
                             placeholder="Your phone number" required />
                         <div v-if="form.errors.phone" class="text-red-500 text-sm">{{ form.errors.phone }}</div>
+                    </div>
+
+                     <!-- Referral Code Field -->
+                    <div class="flex flex-col space-y-2">
+                        <label for="referral_code" class="text-sm font-medium text-gray-700 dark:text-gray-300">Referral Code</label>
+                        <input type="text" id="referral_code" v-model="form.referral_code"
+                            class="px-4 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:border-gray-600"
+                            placeholder="Referral Code" />
+                        <div v-if="form.errors.referral_code" class="text-red-500 text-sm">{{ form.errors.referral_code }}</div>
                     </div>
 
                     <!-- Service Field -->

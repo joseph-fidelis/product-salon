@@ -18,6 +18,7 @@ class Appointment extends Model
         'customer_name',
         'customer_email',
         'customer_phone',
+        'referral_code',
         'appointment_date',
         'appointment_time',
         'status', // Pending, Approved, Completed, Cancelled, No-Show

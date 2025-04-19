@@ -41,6 +41,7 @@ class AppointmentController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'required|string|max:20',
+            'referral_code' => 'nullable|string|max:50',
             'booking_date' => 'required|date|after_or_equal:today',
             'booking_time' => 'required|date_format:H:i',
             'service_id' => 'required|exists:services,id',
